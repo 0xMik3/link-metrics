@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	repo "github.com/0xMik3/link-metrics/internal/application/repository/psql"
+	s "github.com/0xMik3/link-metrics/internal/application/services/shortener"
 	"github.com/0xMik3/link-metrics/internal/config"
 	"github.com/0xMik3/link-metrics/internal/infra/adapters/driven/cmux"
 	"github.com/0xMik3/link-metrics/internal/infra/adapters/driven/psql"
@@ -19,9 +21,13 @@ func main() {
 	if err != nil {
 		return
 	}
+	psql.Sync_tables(db)
 	defer db.Close()
 
-	restServer := rest.NewRestHandler()
+	shortenerRepo := repo.NewShortenerRepository(db)
+	shortenerService := s.NewShortenerService(ctx, shortenerRepo)
+
+	restServer := rest.NewRestHandler(shortenerService)
 	restServer.InitializeRoutes()
 
 	mux := cmux.NewCmuxConfig(config.Port)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 )
 
 type FiberServer struct {
@@ -17,6 +18,6 @@ func NewFiberApp() *FiberServer {
 }
 
 func (f *FiberServer) Start(port string) error {
-
+	log.Info("App ready in port:", port)
 	return f.App.Listen(fmt.Sprintf(":%v", port))
 }

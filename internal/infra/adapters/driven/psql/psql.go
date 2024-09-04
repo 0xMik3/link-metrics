@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/0xMik3/link-metrics/internal/config"
+	"github.com/0xMik3/link-metrics/internal/domain"
 	"github.com/go-xorm/xorm"
 	"github.com/gofiber/fiber/v2/log"
+	_ "github.com/lib/pq"
 )
 
 func Connect(config *config.Config) (*xorm.Engine, error) {
@@ -24,4 +26,13 @@ func Connect(config *config.Config) (*xorm.Engine, error) {
 	}
 	log.Info("connected to db succesfully")
 	return engine, nil
+}
+
+func Sync_tables(en *xorm.Engine) {
+	err := en.Sync(new(domain.Url))
+	if err != nil {
+		log.Error("creation error", err)
+		return
+	}
+	log.Info("Successfully synced")
 }

@@ -7,13 +7,17 @@ import (
 	"github.com/0xMik3/link-metrics/internal/domain"
 )
 
-func (s *ShortenerService) Create(url *domain.Url) error {
+func (s *ShortenerService) Create(url *domain.Url) (string, error) {
 	key := generate_key()
 
 	url.Key = key
 	url.TotalClicks = 0
 
-	return nil
+	err := s.shortenerRepo.Create(url)
+	if err != nil {
+		return "", err
+	}
+	return key, nil
 }
 
 func generate_key() string {
