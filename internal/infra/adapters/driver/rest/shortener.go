@@ -36,6 +36,8 @@ func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
 
 	// ip, _, _ := net.SplitHostPort(c.Context().RemoteAddr().String())
 	log.Info("remote add: ", c.IP())
+	xForwardedFor := c.Get("X-Forwarded-For")
+	log.Info("forwarded for:", xForwardedFor)
 
 	key := c.Params("key")
 	referer := c.Get("Referer", "anonymous")
