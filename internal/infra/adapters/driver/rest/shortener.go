@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"strings"
+
 	"github.com/gofiber/fiber/v2/log"
 
 	"github.com/0xMik3/link-metrics/internal/application/services/shortener/dtos"
@@ -33,15 +35,15 @@ func (r *RestHandler) ShortenUrl(c *fiber.Ctx) error {
 }
 
 func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
-
-	// ip, _, _ := net.SplitHostPort(c.Context().RemoteAddr().String())
-	log.Info("remote add: ", c.IP())
 	xForwardedFor := c.Get("X-Forwarded-For")
-	log.Info("forwarded for:", xForwardedFor)
-
+	ips := strings.Split(xForwardedFor, ",")
+	clientIp := ""
+	if len(ips) > 0 {
+		clientIp = ips[0]
+	}
 	key := c.Params("key")
 	referer := c.Get("Referer", "anonymous")
-	log.Info("Referer:", referer)
+	log.Info("Referer:", referer, "ip:", clientIp)
 	url, err := r.Shortener.GetByKey(key)
 	if err != nil {
 		if err.Error() == "not found" {
