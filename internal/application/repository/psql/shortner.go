@@ -30,3 +30,49 @@ func (r *ShortenerRepository) Create(url *domain.Url) error {
 	}
 	return nil
 }
+
+func (r *ShortenerRepository) GetByKey(key string) (*domain.Url, error) {
+	url := domain.Url{
+		Key: key,
+	}
+	has, err := r.engine.Get(&url)
+	if err != nil {
+		log.Error("error while retreiving url:", err)
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("not found")
+	}
+	return &url, nil
+}
+
+func (r *ShortenerRepository) GetById(id int64) (*domain.Url, error) {
+	url := domain.Url{
+		Id: id,
+	}
+	has, err := r.engine.Get(&url)
+	if err != nil {
+		log.Error("error while retreiving url:", err)
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("not found")
+	}
+	return &url, nil
+}
+
+func (r *ShortenerRepository) UpdateTotalClicks(id int64) error {
+	url, err := r.GetById(id)
+	if err != nil {
+		return err
+	}
+	affected, err := r.engine.Table(new(domain.Url)).ID(id).Update(map[string]interface{}{"total_clicks": url.TotalClicks + 1})
+	if err != nil {
+		log.Error("error ocurred while updating total clicks:", err)
+		return err
+	}
+	if affected < 1 {
+		log.Error("could not update totalclicks on id:", id)
+	}
+	return nil
+}

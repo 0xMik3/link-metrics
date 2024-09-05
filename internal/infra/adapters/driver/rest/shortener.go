@@ -23,12 +23,41 @@ func (r *RestHandler) ShortenUrl(c *fiber.Ctx) error {
 	if err != nil {
 		log.Println(err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Cannot create user",
+			"message": "Cannot short url",
 		})
 	}
 	return c.JSON(
 		fiber.Map{
 			"key": key,
+		},
+	)
+}
+
+func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
+
+	// ip, _, _ := net.SplitHostPort(c.Context().RemoteAddr().String())
+	log.Println("remote add: ", c.Context().RemoteAddr().String())
+
+	key := c.Params("key")
+	referer := c.Get("Referer", "anonymous")
+	log.Println("Referer:", referer)
+	url, err := r.Shortener.GetByKey(key)
+	if err != nil {
+		if err.Error() == "not found" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"message": "Url not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Cannot retreive url",
+		})
+	}
+
+	_ = r.Shortener.UpdateTotalClicks(url.Id)
+
+	return c.JSON(
+		fiber.Map{
+			"url": url.Url,
 		},
 	)
 }

@@ -29,7 +29,7 @@ func Connect(config *config.Config) (*xorm.Engine, error) {
 }
 
 func Sync_tables(en *xorm.Engine) {
-	err := en.Sync(new(domain.Url))
+	err := en.Sync(new(domain.Url), new(domain.Metric))
 	if err != nil {
 		log.Error("creation error", err)
 		return

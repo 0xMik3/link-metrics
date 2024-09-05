@@ -5,7 +5,8 @@ import "time"
 type Url struct {
 	Id          int64
 	Url         string `xorm:"text"`
-	Key         string `xorm:"varchar(6) unique index"`
+	Name        string `xorm:"index"`
+	Key         string `xorm:"varchar(8) unique index"`
 	TotalClicks int64
 	CreatedAt   time.Time `xorm:"created"`
 	UpdatedAt   time.Time `xorm:"updated"`

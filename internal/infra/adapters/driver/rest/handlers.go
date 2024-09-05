@@ -30,6 +30,7 @@ func (r *RestHandler) InitializeRoutes() {
 
 	shorten := api.Group("shorten")
 	shorten.Post("/", r.ShortenUrl)
+	shorten.Get("/:key", r.GetUrl)
 }
 
 func (r *RestHandler) Start(l net.Listener) error {
