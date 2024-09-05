@@ -36,7 +36,7 @@ func (r *RestHandler) ShortenUrl(c *fiber.Ctx) error {
 func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
 
 	// ip, _, _ := net.SplitHostPort(c.Context().RemoteAddr().String())
-	log.Println("remote add: ", c.Context().RemoteAddr().String())
+	log.Println("remote add: ", c.Context().Host())
 
 	key := c.Params("key")
 	referer := c.Get("Referer", "anonymous")
