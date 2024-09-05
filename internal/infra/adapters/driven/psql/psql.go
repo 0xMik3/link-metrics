@@ -11,8 +11,8 @@ import (
 )
 
 func Connect(config *config.Config) (*xorm.Engine, error) {
-	connection_string := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		config.DbHost, config.DbPort, config.DbUser, config.DbPassword, config.DbName)
+	connection_string := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		config.DbHost, config.DbPort, config.DbUser, config.DbPassword, config.DbName, config.DbSslMode)
 
 	engine, err := xorm.NewEngine("postgres", connection_string)
 	if err != nil {

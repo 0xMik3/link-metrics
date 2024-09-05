@@ -16,6 +16,7 @@ type Config struct {
 	DbPassword string `env:"DB_PASSWORD" envDefault:"postgres"`
 	DbName     string `env:"DB_NAME" envDefault:"postgres"`
 	DbPort     string `env:"DB_PORT" envDefault:"5432"`
+	DbSslMode  string `env:"DB_SSLMODE" envDefault:"disable"`
 }
 
 func (c *Config) GetEnvs(ctx context.Context) context.Context {
