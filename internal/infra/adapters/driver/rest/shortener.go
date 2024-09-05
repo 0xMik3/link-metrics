@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"log"
+	"github.com/gofiber/fiber/v2/log"
 
 	"github.com/0xMik3/link-metrics/internal/application/services/shortener/dtos"
 	"github.com/0xMik3/link-metrics/internal/domain"
@@ -11,7 +11,7 @@ import (
 func (r *RestHandler) ShortenUrl(c *fiber.Ctx) error {
 	var url dtos.ShortenUrlDto
 	if err := c.BodyParser(&url); err != nil {
-		log.Println(err)
+		log.Error(err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Cannot parse JSON",
 		})
@@ -21,7 +21,6 @@ func (r *RestHandler) ShortenUrl(c *fiber.Ctx) error {
 	})
 
 	if err != nil {
-		log.Println(err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Cannot short url",
 		})
@@ -36,11 +35,11 @@ func (r *RestHandler) ShortenUrl(c *fiber.Ctx) error {
 func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
 
 	// ip, _, _ := net.SplitHostPort(c.Context().RemoteAddr().String())
-	log.Println("remote add: ", c.IP())
+	log.Info("remote add: ", c.IP())
 
 	key := c.Params("key")
 	referer := c.Get("Referer", "anonymous")
-	log.Println("Referer:", referer)
+	log.Info("Referer:", referer)
 	url, err := r.Shortener.GetByKey(key)
 	if err != nil {
 		if err.Error() == "not found" {
@@ -54,6 +53,8 @@ func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
 	}
 
 	_ = r.Shortener.UpdateTotalClicks(url.Id)
+
+	// return c.Redirect(url.Url, fiber.StatusMovedPermanently)
 
 	return c.JSON(
 		fiber.Map{
