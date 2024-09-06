@@ -1,15 +1,31 @@
 package shortener
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand"
+	"net/http"
 	"time"
 
 	"github.com/0xMik3/link-metrics/internal/domain"
+	"github.com/gofiber/fiber/v2/log"
 )
 
+func (s *ShortenerService) Generate_key() string {
+	const alpha_num = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+	const length = 8
+
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	shortKey := make([]byte, length)
+	for i := range shortKey {
+		shortKey[i] = alpha_num[rand.Intn(len(alpha_num))]
+	}
+	return string(shortKey)
+}
+
 func (s *ShortenerService) Create(url *domain.Url) (string, error) {
-	key := generate_key()
+	key := s.Generate_key()
 
 	url.Key = key
 	url.TotalClicks = 0
@@ -37,14 +53,33 @@ func (s *ShortenerService) UpdateTotalClicks(id int64) error {
 	return s.shortenerRepo.UpdateTotalClicks(id)
 }
 
-func generate_key() string {
-	const alpha_num = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-	const length = 8
-
-	rand.New(rand.NewSource(time.Now().UnixNano()))
-	shortKey := make([]byte, length)
-	for i := range shortKey {
-		shortKey[i] = alpha_num[rand.Intn(len(alpha_num))]
+func (s *ShortenerService) CheckIpLocation(ip string) (*domain.IpLocation, error) {
+	ipLocation := domain.IpLocation{}
+	requestUrl := fmt.Sprintf("https://api.iplocation.net/?ip=%s", ip)
+	res, err := http.Get(requestUrl)
+	if err != nil {
+		log.Error("could not get data from ip:", err)
+		return nil, err
 	}
-	return string(shortKey)
+	defer res.Body.Close()
+
+	json.NewDecoder(res.Body).Decode(&ipLocation)
+	return &ipLocation, nil
+}
+
+func (s *ShortenerService) HandleClick(id int64, ip string, referer string) {
+	metric := domain.Metric{
+		UrlId:   id,
+		Referer: referer,
+	}
+
+	_ = s.UpdateTotalClicks(id)
+
+	ipLocation, err := s.CheckIpLocation(ip)
+	if err == nil {
+		metric.CountryCode = ipLocation.CountryCode
+		metric.CountryName = ipLocation.CountryName
+	}
+
+	s.shortenerRepo.CreateMetric(&metric)
 }

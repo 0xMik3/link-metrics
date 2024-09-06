@@ -76,3 +76,15 @@ func (r *ShortenerRepository) UpdateTotalClicks(id int64) error {
 	}
 	return nil
 }
+
+func (r *ShortenerRepository) CreateMetric(metric *domain.Metric) error {
+	affected, err := r.engine.InsertOne(metric)
+	if err != nil {
+		log.Error("error ocurred while inserting record:", err)
+		return err
+	}
+	if affected < 1 {
+		return errors.New("could not insert record in db")
+	}
+	return nil
+}

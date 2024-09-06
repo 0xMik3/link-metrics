@@ -19,7 +19,8 @@ func (r *RestHandler) ShortenUrl(c *fiber.Ctx) error {
 		})
 	}
 	key, err := r.Shortener.Create(&domain.Url{
-		Url: url.Url,
+		Url:  url.Url,
+		Name: url.Name,
 	})
 
 	if err != nil {
@@ -35,17 +36,17 @@ func (r *RestHandler) ShortenUrl(c *fiber.Ctx) error {
 }
 
 func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
-	xForwardedFor := c.Get("X-Forwarded-For")
-	ips := strings.Split(xForwardedFor, ",")
-	clientIp := ""
+	xForwardedFor := c.Get("X-Forwarded-For", "")
+	ips := []string{}
+	if xForwardedFor != "" {
+		ips = strings.Split(xForwardedFor, ",")
+	}
+	clientIp := "86.106.87.229"
 	if len(ips) > 0 {
 		clientIp = ips[0]
 	}
 	key := c.Params("key")
 	referer := c.Get("Referer", "anonymous")
-	log.Info("Referer:", referer, "ip:", clientIp)
-
-	// Check api info https://api.iplocation.net/?ip=x.x.x.x
 
 	url, err := r.Shortener.GetByKey(key)
 	if err != nil {
@@ -59,9 +60,7 @@ func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
 		})
 	}
 
-	_ = r.Shortener.UpdateTotalClicks(url.Id)
-
-	// return c.Redirect(url.Url, fiber.StatusMovedPermanently)
+	r.Shortener.HandleClick(url.Id, clientIp, referer)
 
 	return c.JSON(
 		fiber.Map{
