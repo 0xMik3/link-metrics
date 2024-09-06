@@ -44,6 +44,9 @@ func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
 	key := c.Params("key")
 	referer := c.Get("Referer", "anonymous")
 	log.Info("Referer:", referer, "ip:", clientIp)
+
+	// Check api info https://api.iplocation.net/?ip=x.x.x.x
+
 	url, err := r.Shortener.GetByKey(key)
 	if err != nil {
 		if err.Error() == "not found" {
