@@ -85,6 +85,9 @@ func (s *ShortenerService) HandleClick(id int64, ip string, referer string, user
 		defer wg.Done()
 		client := s.parser.Parse(userAgent)
 		metric.Device = client.Os.Family
+		if metric.Device == "" {
+			metric.Device = "Other"
+		}
 	}()
 
 	wg.Add(1)
