@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/0xMik3/link-metrics/internal/domain"
@@ -68,12 +69,16 @@ func (s *ShortenerService) CheckIpLocation(ip string) (*domain.IpLocation, error
 }
 
 func (s *ShortenerService) HandleClick(id int64, ip string, referer string) {
+	var wg sync.WaitGroup
 	metric := domain.Metric{
 		UrlId:   id,
 		Referer: referer,
 	}
-
-	_ = s.UpdateTotalClicks(id)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		s.UpdateTotalClicks(id)
+	}()
 
 	ipLocation, err := s.CheckIpLocation(ip)
 	if err == nil {
@@ -82,4 +87,5 @@ func (s *ShortenerService) HandleClick(id int64, ip string, referer string) {
 	}
 
 	s.shortenerRepo.CreateMetric(&metric)
+	wg.Wait()
 }
