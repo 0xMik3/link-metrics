@@ -11,7 +11,6 @@ import (
 
 	"github.com/0xMik3/link-metrics/internal/domain"
 	"github.com/gofiber/fiber/v2/log"
-	"github.com/ua-parser/uap-go/uaparser"
 )
 
 func (s *ShortenerService) Generate_key() string {
@@ -84,14 +83,8 @@ func (s *ShortenerService) HandleClick(id int64, ip string, referer string, user
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		parser, err := uaparser.New("./regexes.yaml")
-		if err != nil {
-			log.Info("error creating parser: ", err)
-		}
-		if err == nil {
-			client := parser.Parse(userAgent)
-			metric.Device = client.Os.Family
-		}
+		client := s.parser.Parse(userAgent)
+		metric.Device = client.Os.Family
 	}()
 
 	wg.Add(1)

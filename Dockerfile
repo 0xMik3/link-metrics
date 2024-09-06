@@ -22,7 +22,6 @@ RUN go mod download && \
 FROM scratch
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /bin/service /bin/service
-COPY  regexes.yaml /bin/regexes.yaml
 
 ENV PORT 8080
 EXPOSE 8080
