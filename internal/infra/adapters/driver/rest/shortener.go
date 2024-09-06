@@ -36,6 +36,8 @@ func (r *RestHandler) ShortenUrl(c *fiber.Ctx) error {
 }
 
 func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
+
+	userAgent := c.Get("User-Agent")
 	xForwardedFor := c.Get("X-Forwarded-For", "")
 	ips := []string{}
 	if xForwardedFor != "" {
@@ -60,7 +62,7 @@ func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
 		})
 	}
 
-	r.Shortener.HandleClick(url.Id, clientIp, referer)
+	r.Shortener.HandleClick(url.Id, clientIp, referer, userAgent)
 
 	return c.JSON(
 		fiber.Map{

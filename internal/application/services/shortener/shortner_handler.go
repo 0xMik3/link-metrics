@@ -11,6 +11,7 @@ import (
 
 	"github.com/0xMik3/link-metrics/internal/domain"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/ua-parser/uap-go/uaparser"
 )
 
 func (s *ShortenerService) Generate_key() string {
@@ -68,7 +69,7 @@ func (s *ShortenerService) CheckIpLocation(ip string) (*domain.IpLocation, error
 	return &ipLocation, nil
 }
 
-func (s *ShortenerService) HandleClick(id int64, ip string, referer string) {
+func (s *ShortenerService) HandleClick(id int64, ip string, referer string, userAgent string) {
 	var wg sync.WaitGroup
 	metric := domain.Metric{
 		UrlId:   id,
@@ -79,6 +80,15 @@ func (s *ShortenerService) HandleClick(id int64, ip string, referer string) {
 		defer wg.Done()
 		s.UpdateTotalClicks(id)
 	}()
+
+	parser, err := uaparser.New("./regexes.yaml")
+	if err != nil {
+		log.Info("error creating parser: ", err)
+	}
+	if err == nil {
+		client := parser.Parse(userAgent)
+		metric.Device = client.Os.Family
+	}
 
 	ipLocation, err := s.CheckIpLocation(ip)
 	if err == nil {

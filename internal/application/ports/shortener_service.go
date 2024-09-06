@@ -8,5 +8,5 @@ type ShortnerService interface {
 	GetByKey(key string) (*domain.Url, error)
 	UpdateTotalClicks(id int64) error
 	CheckIpLocation(ip string) (*domain.IpLocation, error)
-	HandleClick(id int64, ip string, referer string)
+	HandleClick(id int64, ip string, referer string, userAgent string)
 }
