@@ -81,21 +81,29 @@ func (s *ShortenerService) HandleClick(id int64, ip string, referer string, user
 		s.UpdateTotalClicks(id)
 	}()
 
-	parser, err := uaparser.New("./regexes.yaml")
-	if err != nil {
-		log.Info("error creating parser: ", err)
-	}
-	if err == nil {
-		client := parser.Parse(userAgent)
-		metric.Device = client.Os.Family
-	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		parser, err := uaparser.New("./regexes.yaml")
+		if err != nil {
+			log.Info("error creating parser: ", err)
+		}
+		if err == nil {
+			client := parser.Parse(userAgent)
+			metric.Device = client.Os.Family
+		}
+	}()
 
-	ipLocation, err := s.CheckIpLocation(ip)
-	if err == nil {
-		metric.CountryCode = ipLocation.CountryCode
-		metric.CountryName = ipLocation.CountryName
-	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ipLocation, err := s.CheckIpLocation(ip)
+		if err == nil {
+			metric.CountryCode = ipLocation.CountryCode
+			metric.CountryName = ipLocation.CountryName
+		}
+	}()
+	wg.Wait()
 
 	s.shortenerRepo.CreateMetric(&metric)
-	wg.Wait()
 }
