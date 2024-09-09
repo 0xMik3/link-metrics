@@ -12,7 +12,7 @@ WORKDIR /src
 
 COPY ../. .
 
-RUN go mod download ../ && \
+RUN go mod download && \
     go build -trimpath -ldflags "-s -w -extldflags '-static'" \
     -installsuffix cgo -tags netgo \
     -o /bin/service ../cmd/service/main.go && \
