@@ -43,7 +43,7 @@ func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
 	if xForwardedFor != "" {
 		ips = strings.Split(xForwardedFor, ",")
 	}
-	clientIp := "86.106.87.229"
+	clientIp := ""
 	if len(ips) > 0 {
 		clientIp = ips[0]
 	}
@@ -64,9 +64,11 @@ func (r *RestHandler) GetUrl(c *fiber.Ctx) error {
 
 	r.Shortener.HandleClick(url.Id, clientIp, referer, userAgent)
 
-	return c.JSON(
-		fiber.Map{
-			"url": url.Url,
-		},
-	)
+	return c.Redirect(url.Url, 301)
+
+	// return c.JSON(
+	// 	fiber.Map{
+	// 		"url": url.Url,
+	// 	},
+	// )
 }
