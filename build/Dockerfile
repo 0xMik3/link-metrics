@@ -17,7 +17,7 @@ RUN ls -la
 RUN go mod download && \
     go build -trimpath -ldflags "-s -w -extldflags '-static'" \
     -installsuffix cgo -tags netgo \
-    -o /bin/service /cmd/service/main.go && \
+    -o /bin/service ./cmd/service/main.go && \
     strip /bin/service && \
     upx -q -9 /bin/service
 
