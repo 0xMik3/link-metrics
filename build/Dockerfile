@@ -12,6 +12,8 @@ WORKDIR /src
 
 COPY ../. .
 
+RUN ls -la
+
 RUN go mod download && \
     go build -trimpath -ldflags "-s -w -extldflags '-static'" \
     -installsuffix cgo -tags netgo \
